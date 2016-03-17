@@ -46,13 +46,13 @@
 			};
 			
 			var geocoder;
-			function initialize () {
+			/* function initialize () {
 				geocoder = new google.maps.Geocoder();
 				//var address = '"' + allOregonFarms[i].address + ', ' + allOregonFarms[i].city + '"';
 				geocodeFarms(function(latlng) {
 					console.log(latlng);
 				});
-			};
+			}; */
 			
 			var farmLatLngs = [];
 			function geocodeFarms(callback) {
@@ -77,6 +77,8 @@
 							//	position: results[0].geometry.location
 							//});
 							callback(farmLatLngs);
+							return farmLatLngs;
+							
 						} else {
 							console.log("Geocode was not successful for the following reason: " + status);
 						}
