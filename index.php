@@ -8,9 +8,10 @@
 		<div id="map-canvas"></div>
 		<div>
 			
-			<input type="button" value="Encode" onclick="geocodeFarms(function(latlng) {
-				return latlng;
-			});">
+			<input type="button" value="Encode" onclick="geocodeFarms(farmAddresses, function (results) {
+            return results;
+        });">
+			<input type="button" value="Push LatLngs" onclick="pushLatLng(allOregonFarms, farmLatLngs);">
 		</div>
 		<div class="footer">
 			<p>&copy;<?php echo date('Y'); ?> Aaron Bini</p>
@@ -19,6 +20,14 @@
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCg-HUqHhznjp_zNNOgERRwm_ONHtJvCD4"></script>
 		<script type="text/javascript">
+			//onclick calls 
+			/* getLatLng(allAddresses, function (results) {
+            return results);
+        });
+		
+		<input type="button" value="Encode" onclick="geocodeFarms(function(latlng) {
+				return latlng;
+			});"> */
 			
 			var allOregonFarms = (function () {
 				var allOregonFarms = null;
@@ -34,6 +43,19 @@
 				return allOregonFarms;
 			})();
 			
+			var farmAddresses = [];
+			
+			function pullAddresses(farmsArray) {
+				for (var i = 10; i < 20; i++) {
+					var farmAddress = {};
+					//farmAddress['name'] = farmsArray[i].name;
+					farmAddress = farmsArray[i].address + ', ' + farmsArray[i].city;
+					farmAddresses.push(farmAddress);
+				}
+			}
+			
+			pullAddresses(allOregonFarms);
+			
 			var map;
 			
 			function load() {
@@ -46,48 +68,58 @@
 			};
 			
 			var geocoder;
-			/* function initialize () {
-				geocoder = new google.maps.Geocoder();
-				//var address = '"' + allOregonFarms[i].address + ', ' + allOregonFarms[i].city + '"';
-				geocodeFarms(function(latlng) {
-					console.log(latlng);
-				});
-			}; */
-			
 			var farmLatLngs = [];
-			function geocodeFarms(callback) {
+			
+			function geocodeFarms(addresses, callback) {
+				addresses.forEach(function(address) {
+				
 				geocoder = new google.maps.Geocoder();
-				//var address = '"' + allOregonFarms[i].address + ', ' + allOregonFarms[i].city + '"';
-				for (var i = 0; i <= 10; i++) {
-					geocoder.geocode({'address': '"' + allOregonFarms[i].address + ', ' + allOregonFarms[i].city + '"'}, function(results, status) {
-						if (status == google.maps.GeocoderStatus.OK) {
-							//farmLatLngs[i] = results[0].geometry.location;
-							//console.log(farmLatLngs);
-							var newElement = {};
-							newElement['name'] = allOregonFarms[i]['name'];
-							newElement['lat'] = results[0].geometry.location.lat();
-							newElement['lng'] = results[0].geometry.location.lng();
-							allOregonFarms[i].lat = results[0].geometry.location.lat();
-							allOregonFarms[i].lng = results[0].geometry.location.lng();
-							farmLatLngs.push(newElement);
-							console.log("farmLatLngs: " + farmLatLngs);
-							//map.setCenter(results[0].geometry.location);
-							//var marker = new google.maps.Marker({
-							//	map: map,
-							//	position: results[0].geometry.location
-							//});
-							callback(farmLatLngs);
-							return farmLatLngs;
-							
-						} else {
-							console.log("Geocode was not successful for the following reason: " + status);
-						}
-					});
-					//console.log(farmLatLngs);
-					//return farmLatLngs;
-				};
-				//console.log(farmLatLngs);
-				//return farmLatLngs;
+				//for (var i = 0; i < 10; i++) {
+					//var date = Date.now()
+						//console.log("waiting...");
+						//while(Date.now()-date<500) {
+							//do nothing
+						//};
+						//'address': '"' + allOregonFarms[i].address + ', ' + allOregonFarms[i].city + '"'
+					geocoder.geocode({'address': address}, function(results, status) {
+							if (status == google.maps.GeocoderStatus.OK) {
+								var farmInfo = {};
+								farmInfo['lat'] = results[0].geometry.location.lat();
+								farmInfo['lng'] = results[0].geometry.location.lng();
+								farmLatLngs.push(farmInfo);
+								
+								//all addresses have been processed
+								//if (farmLatLngs.length === addresses.length)
+								
+								//map.setCenter(results[0].geometry.location);
+								//var marker = new google.maps.Marker({
+								//	map: map,
+								//	position: results[0].geometry.location
+								//});
+								callback(farmLatLngs);
+								//console.log("farmlatlngs: " + farmLatLngs);
+								//return farmLatLngs;
+								var date = Date.now();
+								console.log("waiting...");
+								while(Date.now()-date<500) {
+									//do nothing
+								};
+							} else {
+								//may need to push undefined lat lngs for bad addresses
+								console.log("Geocode was not successful for the following reason: " + status);
+							}
+						});
+					//};
+				});
+			}
+			
+			
+			function pushLatLng(farmArray, arrayLatLng) {
+				for(var i = 10; i < 20; i++) {
+					farmArray[i]['lat'] = arrayLatLng[i]['lat'];
+					farmArray[i]['lng'] = arrayLatLng[i]['lng'];
+					console.log(farmArray[i]);
+				}
 			}
 			
 			google.maps.event.addDomListener(window, 'load', load);
